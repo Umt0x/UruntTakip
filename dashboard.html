@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>MediaMarkt Ürün Takip</title>
+<script>
+  // Tema değişimi anında uygulansın diye (flaş olmaması için) hızlı senkron önbellekten okunur.
+  try {
+    var cached = localStorage.getItem("mm-theme-cache");
+    if (cached === "dark") document.documentElement.setAttribute("data-theme", "dark");
+  } catch (e) {}
+</script>
+<style>
+  :root {
+    --mm-red: #e11d48;
+    --mm-red-dark: #be123c;
+    --mm-red-soft: #fff1f2;
+    --mm-green: #16a34a;
+    --mm-green-soft: #f0fdf4;
+    --mm-blue: #2563eb;
+    --mm-blue-soft: #eff6ff;
+
+    --mm-bg: #f3f4f7;
+    --mm-bg-gradient: linear-gradient(160deg, #fafbfd 0%, #f0f1f5 100%);
+    --mm-card: #ffffff;
+    --mm-card-soft: #fafbfc;
+    --mm-border: #e8e9ed;
+    --mm-text: #17181c;
+    --mm-muted: #767a84;
+    --mm-shadow: 0 1px 2px rgba(20,20,30,0.04), 0 8px 20px rgba(20,20,30,0.05);
+    --mm-shadow-hover: 0 4px 10px rgba(20,20,30,0.06), 0 16px 32px rgba(20,20,30,0.09);
+  }
+
+  html[data-theme="dark"] {
+    --mm-red: #fb7185;
+    --mm-red-dark: #f43f5e;
+    --mm-red-soft: rgba(251,113,133,0.12);
+    --mm-green: #4ade80;
+    --mm-green-soft: rgba(74,222,128,0.12);
+    --mm-blue: #60a5fa;
+    --mm-blue-soft: rgba(96,165,250,0.12);
+
+    --mm-bg: #121317;
+    --mm-bg-gradient: linear-gradient(160deg, #17181d 0%, #101114 100%);
+    --mm-card: #1b1c22;
+    --mm-card-soft: #202127;
+    --mm-border: #2a2c34;
+    --mm-text: #eceef2;
+    --mm-muted: #9195a1;
+    --mm-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.35);
+    --mm-shadow-hover: 0 4px 12px rgba(0,0,0,0.4), 0 16px 36px rgba(0,0,0,0.45);
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--mm-bg-gradient);
+    color: var(--mm-text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    transition: background .25s ease, color .25s ease;
+  }
+  ::selection { background: var(--mm-red-soft); color: var(--mm-red-dark); }
+
+  .mm-layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .mm-sidebar {
+    width: 272px;
+    flex-shrink: 0;
+    background: var(--mm-card);
+    border-right: 1px solid var(--mm-border);
+    padding: 24px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    transition: background .25s ease, border-color .25s ease;
+  }
+
+  .mm-brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .mm-brand { display: flex; align-items: center; gap: 9px; }
+  .mm-brand-mark {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--mm-red), var(--mm-red-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    box-shadow: 0 3px 8px rgba(225,29,72,0.35);
+    flex-shrink: 0;
+  }
+  .mm-brand h1 { font-size: 15px; margin: 0; font-weight: 800; letter-spacing: -0.2px; }
+
+  .mm-theme-toggle {
+    border: 1px solid var(--mm-border);
+    background: var(--mm-card-soft);
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s ease, background .2s ease;
+    flex-shrink: 0;
+  }
+  .mm-theme-toggle:hover { transform: scale(1.08); background: var(--mm-border); }
+  .mm-theme-toggle:active { transform: scale(0.94); }
+
+  .mm-brand-sub {
+    font-size: 11px;
+    color: var(--mm-muted);
+    margin: 6px 0 22px;
+    line-height: 1.55;
+  }
+
+  .mm-sidebar-section {
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--mm-border);
+  }
+  .mm-sidebar-section:last-child { border-bottom: none; }
+  .mm-side-label {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--mm-muted);
+    margin-bottom: 10px;
+  }
+  select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--mm-border);
+    border-radius: 9px;
+    font-size: 12.5px;
+    background: var(--mm-card-soft);
+    color: var(--mm-text);
+  }
+  .mm-checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--mm-muted);
+    line-height: 1.45;
+    cursor: pointer;
+  }
+  .mm-checkbox-row input { width: 15px; height: 15px; margin-top: 1px; flex-shrink: 0; accent-color: var(--mm-red); }
+
+  button.mm-btn {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: transform .12s ease, filter .15s ease, box-shadow .15s ease;
+  }
+  button.mm-btn:hover { transform: translateY(-1px); box-shadow: var(--mm-shadow); }
+  button.mm-btn:active { transform: translateY(0); }
+
+  .mm-btn-warn { background: #fff8ea; color: #92400e; border-color: #f2d18e; }
+  .mm-btn-blue { background: var(--mm-blue-soft); color: var(--mm-blue); border-color: rgba(37,99,235,0.25); }
+  .mm-btn-indigo { background: rgba(99,102,241,0.1); color: #6366f1; border-color: rgba(99,102,241,0.25); }
+  .mm-btn-danger { background: var(--mm-red-soft); color: var(--mm-red-dark); border-color: rgba(225,29,72,0.25); }
+  html[data-theme="dark"] .mm-btn-warn { background: rgba(251,191,36,0.1); color: #fbbf24; border-color: rgba(251,191,36,0.25); }
+
+  .mm-hint { font-size: 10.5px; color: var(--mm-muted); margin-top: 7px; line-height: 1.45; }
+  #status { min-height: 14px; font-size: 11px; color: var(--mm-blue); margin-top: 10px; font-weight: 600; }
+
+  /* Main content */
+  .mm-main { flex: 1; padding: 30px 36px 44px; max-width: 1220px; }
+  .mm-topbar { margin-bottom: 22px; }
+  .mm-topbar h2 { margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -0.3px; }
+  .mm-topbar-sub { font-size: 12.5px; color: var(--mm-muted); margin-top: 4px; }
+
+  .mm-stats {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .mm-stat {
+    background: var(--mm-card);
+    border: 1px solid var(--mm-border);
+    border-radius: 14px;
+    padding: 15px 12px;
+    text-align: center;
+    box-shadow: var(--mm-shadow);
+    transition: transform .15s ease, box-shadow .15s ease, background .25s ease, border-color .25s ease;
+  }
+  .mm-stat:hover { transform: translateY(-2px); box-shadow: var(--mm-shadow-hover); }
+  .mm-stat-value { font-size: 21px; font-weight: 800; letter-spacing: -0.4px; }
+  .mm-stat-label {
+    font-size: 9.5px; color: var(--mm-muted); font-weight: 700;
+    margin-top: 4px; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .mm-stat.mm-stat-up .mm-stat-value { color: var(--mm-red); }
+  .mm-stat.mm-stat-down .mm-stat-value { color: var(--mm-green); }
+
+  .mm-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 18px;
+  }
+  .mm-filter-tabs {
+    display: flex; gap: 4px;
+    background: var(--mm-card-soft);
+    border: 1px solid var(--mm-border);
+    padding: 4px; border-radius: 11px;
+  }
+  .mm-filter-tab {
+    border: none; background: transparent;
+    padding: 7px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 700;
+    color: var(--mm-muted); cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .mm-filter-tab.mm-active {
+    background: var(--mm-card);
+    color: var(--mm-red);
+    box-shadow: var(--mm-shadow);
+  }
+  #searchBox {
+    padding: 9px 13px;
+    border: 1px solid var(--mm-border);
+    border-radius: 10px;
+    font-size: 12.5px;
+    min-width: 230px;
+    background: var(--mm-card);
+    color: var(--mm-text);
+  }
+  #searchBox::placeholder { color: var(--mm-muted); }
+
+  .mm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+    gap: 15px;
+  }
+  .mm-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 64px 20px;
+    color: var(--mm-muted);
+    font-size: 13px;
+    background: var(--mm-card);
+    border: 1.5px dashed var(--mm-border);
+    border-radius: 14px;
+  }
+
+  .mm-card {
+    background: var(--mm-card);
+    border: 1px solid var(--mm-border);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--mm-shadow);
+    transition: transform .15s ease, box-shadow .15s ease, background .25s ease, border-color .25s ease;
+  }
+  .mm-card:hover { transform: translateY(-3px); box-shadow: var(--mm-shadow-hover); }
+  .mm-card-top {
+    position: relative;
+    background: var(--mm-card-soft);
+    border-bottom: 1px solid var(--mm-border);
+    display: flex; align-items: center; justify-content: center;
+    height: 112px;
+  }
+  .mm-card-img { max-width: 85%; max-height: 85%; object-fit: contain; }
+  .mm-card-noimg { font-size: 28px; opacity: .6; }
+  .mm-card-badge-tag {
+    position: absolute; top: 9px; left: 9px;
+    font-size: 9.5px; font-weight: 900;
+    padding: 4px 8px; border-radius: 999px;
+    letter-spacing: 0.4px;
+    backdrop-filter: blur(4px);
+  }
+  .mm-tag-up { background: var(--mm-red-soft); color: var(--mm-red-dark); }
+  .mm-tag-down { background: var(--mm-green-soft); color: var(--mm-green); }
+
+  .mm-card-body { padding: 12px 13px 4px; flex: 1; }
+  .mm-card-name {
+    font-size: 12px; font-weight: 700; line-height: 1.4; margin-bottom: 5px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; min-height: 34px;
+  }
+  .mm-card-code { font-size: 10.5px; color: var(--mm-muted); margin-bottom: 9px; font-weight: 600; }
+  .mm-card-prices { font-size: 12.5px; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+  .mm-card-old { color: var(--mm-muted); text-decoration: line-through; }
+  .mm-card-arrow { color: var(--mm-muted); }
+  .mm-card-new { font-weight: 800; }
+  .mm-card-up .mm-card-new { color: var(--mm-red); }
+  .mm-card-down .mm-card-new { color: var(--mm-green); }
+  .mm-card-delta { font-size: 11px; font-weight: 800; margin-bottom: 4px; }
+  .mm-card-up .mm-card-delta { color: var(--mm-red); }
+  .mm-card-down .mm-card-delta { color: var(--mm-green); }
+  .mm-card-date { font-size: 10px; color: var(--mm-muted); margin-bottom: 9px; }
+
+  .mm-card-actions {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 13px;
+    border-top: 1px solid var(--mm-border);
+    background: var(--mm-card-soft);
+  }
+  .mm-card-link { font-size: 10.5px; color: var(--mm-blue); text-decoration: none; font-weight: 700; }
+  .mm-card-link:hover { text-decoration: underline; }
+  .mm-card-dismiss {
+    border: 1px solid var(--mm-green);
+    background: transparent;
+    color: var(--mm-green);
+    border-radius: 7px;
+    font-size: 10px; font-weight: 800;
+    padding: 4px 9px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .mm-card-dismiss:hover { background: var(--mm-green); color: #fff; }
+
+  @media (max-width: 900px) {
+    .mm-stats { grid-template-columns: repeat(3, 1fr); }
+    .mm-layout { flex-direction: column; }
+    .mm-sidebar { width: 100%; height: auto; position: static; }
+  }
+</style>
+</head>
+<body>
+  <div class="mm-layout">
+    <aside class="mm-sidebar">
+      <div class="mm-brand-row">
+        <div class="mm-brand">
+          <span class="mm-brand-mark">🛒</span>
+          <h1>MediaMarkt Takip</h1>
+        </div>
+        <button class="mm-theme-toggle" id="themeToggle" title="Gece / Gündüz modu">🌙</button>
+      </div>
+      <p class="mm-brand-sub">Ürün takibi, HB/Trendyol araması, fiyat karşılaştırma ve zam/indirim bildirimi.</p>
+
+      <div class="mm-sidebar-section">
+        <label class="mm-side-label" for="searchPlatform">Ürün nerede aransın?</label>
+        <select id="searchPlatform">
+          <option value="hb">Hepsiburada</option>
+          <option value="ty">Trendyol</option>
+        </select>
+        <label class="mm-checkbox-row">
+          <input type="checkbox" id="autoResetPrice">
+          Fiyat kontrolü işaretlerini bir sonraki ay otomatik kaldır.
+        </label>
+      </div>
+
+      <div class="mm-sidebar-section">
+        <span class="mm-side-label">Fiyat Kontrolü</span>
+        <button class="mm-btn mm-btn-warn" id="resetPriceBtn">🧹 Tüm Fiyat Kontrollerini Sıfırla</button>
+        <p class="mm-hint">Yalnızca fiyat kontrolünü siler; "Eklendi" işaretlerine dokunmaz.</p>
+      </div>
+
+      <div class="mm-sidebar-section">
+        <span class="mm-side-label">Zam / İndirim Kayıtları</span>
+        <button class="mm-btn mm-btn-danger" id="clearPriceChangesBtn">🗑️ Tüm Değişiklikleri Temizle</button>
+        <p class="mm-hint">Referans fiyatlar korunur; sadece bildirim listesi temizlenir.</p>
+      </div>
+
+      <div class="mm-sidebar-section">
+        <span class="mm-side-label">Yedekleme</span>
+        <button class="mm-btn mm-btn-blue" id="exportBtn">📥 Yedeği İndir (.json)</button>
+        <button class="mm-btn mm-btn-indigo" id="importBtn">📤 Yedekten Geri Yükle</button>
+        <input type="file" id="fileInput" accept="application/json" style="display:none;">
+        <div id="status"></div>
+      </div>
+    </aside>
+
+    <main class="mm-main">
+      <div class="mm-topbar">
+        <h2>Fiyat Değişiklikleri</h2>
+        <div class="mm-topbar-sub">Yalnızca "Eklendi" işaretli ürünler taranır ve karşılaştırılır.</div>
+      </div>
+
+      <div class="mm-stats">
+        <div class="mm-stat"><div class="mm-stat-value" id="statAdded">0</div><div class="mm-stat-label">Eklendi</div></div>
+        <div class="mm-stat"><div class="mm-stat-value" id="statPriceChecked">0</div><div class="mm-stat-label">Fiyat Kontrolü</div></div>
+        <div class="mm-stat"><div class="mm-stat-value" id="statTracked">0</div><div class="mm-stat-label">Takip Edilen</div></div>
+        <div class="mm-stat"><div class="mm-stat-value" id="statChanged">0</div><div class="mm-stat-label">Değişen</div></div>
+        <div class="mm-stat mm-stat-up"><div class="mm-stat-value" id="statUp">0</div><div class="mm-stat-label">Zamlanan</div></div>
+        <div class="mm-stat mm-stat-down"><div class="mm-stat-value" id="statDown">0</div><div class="mm-stat-label">İnen</div></div>
+      </div>
+
+      <div class="mm-toolbar">
+        <div class="mm-filter-tabs">
+          <button class="mm-filter-tab mm-active" data-filter="all">Tümü</button>
+          <button class="mm-filter-tab" data-filter="up">▲ Zamlananlar</button>
+          <button class="mm-filter-tab" data-filter="down">▼ İnenler</button>
+        </div>
+        <input type="text" id="searchBox" placeholder="Ürün no veya adına göre ara...">
+      </div>
+
+      <div class="mm-grid" id="changeGrid"></div>
+    </main>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

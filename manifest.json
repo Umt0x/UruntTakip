@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "MediaMarkt Ürün Takip",
+  "version": "1.9",
+  "description": "MediaMarkt ürün takibi, HB/Trendyol araması, Vatan/Akakçe/Cimri fiyat karşılaştırması ve zam/indirim bildirimi. İkona tıklayınca tam sayfa panel açılır.",
+  "content_scripts": [
+    {
+      "matches": ["*://www.mediamarkt.com.tr/*", "*://mediamarkt.com.tr/*"],
+      "js": ["content.js", "content-hb.js"],
+      "css": ["content.css", "content-hb.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://www.vatanbilgisayar.com/*",
+        "*://vatanbilgisayar.com/*",
+        "*://www.akakce.com/*",
+        "*://akakce.com/*",
+        "*://www.cimri.com/*",
+        "*://cimri.com/*"
+      ],
+      "js": ["compare-reader.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "MediaMarkt Takip - Paneli Aç"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "tabs"]
+}
