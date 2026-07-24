@@ -1,0 +1,123 @@
+.mm-card-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  width: 168px;
+  box-sizing: border-box;
+}
+
+.mm-detail-fixed {
+  position: fixed;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  z-index: 999999;
+  padding: 14px;
+  border-radius: 16px;
+  width: 220px;
+}
+
+.mm-toggle-btn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 6px;
+  border: 2px solid #cc0033;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #cc0033;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.mm-toggle-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.mm-toggle-btn:active {
+  transform: scale(0.97);
+}
+
+.mm-detail-fixed .mm-toggle-btn {
+  font-size: 16px;
+  padding: 16px 22px;
+}
+
+.mm-toggle-btn.mm-added {
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(46, 125, 50, 0.45);
+}
+
+.mm-toggle-btn.mm-price-checked-btn {
+  border-color: #1565c0;
+  color: #1565c0;
+}
+
+.mm-toggle-btn.mm-price-checked {
+  background: #1565c0;
+  border-color: #1565c0;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(21, 101, 192, 0.45);
+}
+
+.mm-code-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: #f3f4f6;
+  border: 1px solid #dcdfe3;
+  border-radius: 8px;
+  padding: 5px 8px;
+}
+
+.mm-code-text {
+  font-size: 12px;
+  color: #222;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.mm-detail-fixed .mm-code-text {
+  font-size: 13px;
+}
+
+.mm-copy-btn {
+  border: none;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 3px 6px;
+  line-height: 1;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.mm-copy-btn:hover {
+  background: #eee;
+  transform: scale(1.08);
+}

@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "MediaMarkt Ürün Takip",
+  "version": "1.4",
+  "description": "MediaMarkt ürün takibi, HB/Trendyol ürün arama seçimi ve güvenli fiyat kontrolü sıfırlama araçları.",
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.mediamarkt.com.tr/*",
+        "*://mediamarkt.com.tr/*"
+      ],
+      "js": [
+        "content.js",
+        "content-hb.js"
+      ],
+      "css": [
+        "content.css",
+        "content-hb.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "MediaMarkt Takip - Yedekle / Geri Yükle"
+  },
+  "permissions": [
+    "storage"
+  ]
+}
